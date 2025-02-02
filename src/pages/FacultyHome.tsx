@@ -1,4 +1,5 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import BackButton from "@/components/BackButton";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -16,7 +17,7 @@ const FacultyHome = () => {
   const { toast } = useToast();
   const [faculty, setFaculty] = useState<FacultyAccount | null>(null);
 
-  const timeSlots = ["9:00", "10:00", "11:15", "12:15", "1:15", "2:15", "3:15"];
+  const timeSlots = ["9:00", "10:00", "11:15", "12:15", "1:15", "2:15"];
   const days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
 
   useEffect(() => {
@@ -60,6 +61,15 @@ const FacultyHome = () => {
       </header>
 
       <div className="max-w-4xl mx-auto p-6 space-y-6">
+        <div className="flex justify-end">
+          <Button 
+            onClick={() => navigate('/leave-application')}
+            className="bg-sathyabama-blue hover:bg-sathyabama-light"
+          >
+            Apply for Leave
+          </Button>
+        </div>
+
         <Card>
           <CardHeader>
             <CardTitle>Faculty Profile</CardTitle>
@@ -78,7 +88,7 @@ const FacultyHome = () => {
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
-              <div className="grid grid-cols-[auto_repeat(7,1fr)] gap-2 min-w-[800px]">
+              <div className="grid grid-cols-[auto_repeat(6,1fr)] gap-2 min-w-[800px]">
                 <div></div>
                 {timeSlots.map((time, i) => (
                   <div key={i} className="text-center text-sm font-medium">
@@ -91,7 +101,7 @@ const FacultyHome = () => {
                     <div key={`day-${dayIndex}`} className="text-sm font-medium">
                       {day}
                     </div>
-                    {Array(7).fill(null).map((_, slotIndex) => (
+                    {Array(6).fill(null).map((_, slotIndex) => (
                       <div
                         key={`${dayIndex}-${slotIndex}`}
                         className="border p-2 text-sm text-center"
