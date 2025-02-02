@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import BackButton from "@/components/BackButton";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface FacultyAccount {
   id: number;
@@ -97,8 +97,8 @@ const FacultyHome = () => {
                 ))}
                 
                 {days.map((day, dayIndex) => (
-                  <>
-                    <div key={`day-${dayIndex}`} className="text-sm font-medium">
+                  <React.Fragment key={`day-${dayIndex}`}>
+                    <div className="text-sm font-medium">
                       {day}
                     </div>
                     {Array(6).fill(null).map((_, slotIndex) => (
@@ -109,7 +109,7 @@ const FacultyHome = () => {
                         {faculty.timetable[dayIndex][slotIndex]}
                       </div>
                     ))}
-                  </>
+                  </React.Fragment>
                 ))}
               </div>
             </div>
