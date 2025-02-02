@@ -25,7 +25,7 @@ const CreateFaculty = () => {
       title: "Account created",
       description: "Faculty account has been created successfully"
     });
-    navigate("/admin/manage");
+    navigate("/admin"); // Changed from "/admin/manage" to "/admin"
   };
 
   const handleTimetableChange = (dayIndex: number, slotIndex: number, value: string) => {
