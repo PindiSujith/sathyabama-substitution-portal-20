@@ -20,12 +20,30 @@ const CreateFaculty = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
+    
+    // Get existing accounts or initialize empty array
+    const existingAccounts = JSON.parse(localStorage.getItem('facultyAccounts') || '[]');
+    
+    // Create new faculty account with unique ID
+    const newFaculty = {
+      id: Date.now(), // Simple way to generate unique ID
+      ...formData
+    };
+    
+    // Add new account to existing accounts
+    existingAccounts.push(newFaculty);
+    
+    // Save updated accounts list
+    localStorage.setItem('facultyAccounts', JSON.stringify(existingAccounts));
+    
+    console.log("Form submitted:", newFaculty);
+    
     toast({
       title: "Account created",
       description: "Faculty account has been created successfully"
     });
-    navigate("/admin"); // Changed from "/admin/manage" to "/admin"
+    
+    navigate("/admin");
   };
 
   const handleTimetableChange = (dayIndex: number, slotIndex: number, value: string) => {
