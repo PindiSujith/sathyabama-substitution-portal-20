@@ -31,8 +31,31 @@ const Login = () => {
     if (role === "admin" && username === "hod1234" && password === "1234hod") {
       navigate("/admin");
     } else if (role === "faculty") {
-      // In a real app, this would verify against the database
-      navigate("/faculty");
+      // Get faculty accounts from localStorage
+      const facultyAccounts = JSON.parse(localStorage.getItem('facultyAccounts') || '[]');
+      
+      // Find matching faculty account
+      const faculty = facultyAccounts.find(
+        (account: { username: string; password: string; }) => 
+          account.username === username && account.password === password
+      );
+
+      if (faculty) {
+        // Store the logged-in faculty ID in localStorage for reference
+        localStorage.setItem('currentFacultyId', faculty.id.toString());
+        
+        toast({
+          title: "Login successful",
+          description: `Welcome, ${faculty.name}!`
+        });
+        navigate("/faculty");
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Invalid credentials",
+          description: "Please check your username and password",
+        });
+      }
     } else {
       toast({
         variant: "destructive",
@@ -46,7 +69,7 @@ const Login = () => {
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-sathyabama-blue">
+          <h1 className="text-2xl font-bold text-[#8B0000]">
             Sathyabama Faculty Portal
           </h1>
           <p className="mt-2 text-gray-600">Sign in to your account</p>
@@ -82,7 +105,7 @@ const Login = () => {
 
             <Button
               onClick={handleLogin}
-              className="w-full bg-sathyabama-blue hover:bg-sathyabama-light"
+              className="w-full bg-[#8B0000] hover:bg-[#700000]"
             >
               Sign in
             </Button>
