@@ -11,12 +11,35 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 
+// Default faculty account for testing
+const DEFAULT_FACULTY = {
+  id: 1,
+  name: "Test Faculty",
+  username: "faculty123",
+  password: "faculty123",
+  timetable: Array(5).fill(Array(6).fill(""))
+};
+
 const Login = () => {
   const [role, setRole] = useState<string>("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Initialize faculty accounts if they don't exist
+  const initializeFacultyAccounts = () => {
+    const existingAccounts = localStorage.getItem('facultyAccounts');
+    if (!existingAccounts) {
+      localStorage.setItem('facultyAccounts', JSON.stringify([DEFAULT_FACULTY]));
+      console.log("Initialized default faculty account");
+    }
+  };
+
+  // Call initialization when component mounts
+  useState(() => {
+    initializeFacultyAccounts();
+  });
 
   const handleLogin = () => {
     if (!role || !username || !password) {
