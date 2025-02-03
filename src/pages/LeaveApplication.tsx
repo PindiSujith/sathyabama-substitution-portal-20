@@ -1,41 +1,43 @@
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
 import BackButton from "@/components/BackButton";
-import { useToast } from "@/hooks/use-toast";
+import { Calendar } from "@/components/ui/calendar";
 import { useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
-
-interface LeaveFormData {
-  date: Date;
-  reason: string;
-}
+import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const LeaveApplication = () => {
-  const { toast } = useToast();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [selectedDate, setSelectedDate] = useState<Date>();
-  
-  const form = useForm<LeaveFormData>({
-    defaultValues: {
-      reason: "",
-    },
-  });
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
-  const onSubmit = (data: LeaveFormData) => {
-    if (!selectedDate) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please select a date",
-      });
-      return;
+  // Calculate date range for the next 30 days
+  const today = new Date();
+  const maxDate = new Date();
+  maxDate.setDate(today.getDate() + 30);
+
+  const handleDateSelect = (date: Date | undefined) => {
+    setSelectedDate(date);
+    if (date) {
+      setShowConfirmDialog(true);
     }
+  };
 
-    // Get the current faculty's information
+  const handleConfirmLeave = () => {
+    if (!selectedDate) return;
+
+    // Get current faculty's information
     const currentFacultyId = localStorage.getItem('currentFacultyId');
     const facultyAccounts = JSON.parse(localStorage.getItem('facultyAccounts') || '[]');
     const currentFaculty = facultyAccounts.find(
@@ -51,16 +53,14 @@ const LeaveApplication = () => {
       return;
     }
 
-    // Create leave application
+    // Store leave application
     const leaveApplications = JSON.parse(localStorage.getItem('leaveApplications') || '[]');
     const newLeaveApplication = {
       id: Date.now(),
       facultyId: currentFaculty.id,
       facultyName: currentFaculty.name,
       date: selectedDate,
-      reason: data.reason,
-      status: 'pending',
-      timetable: currentFaculty.timetable,
+      status: 'approved',
     };
 
     leaveApplications.push(newLeaveApplication);
@@ -68,76 +68,59 @@ const LeaveApplication = () => {
 
     toast({
       title: "Success",
-      description: "Leave application submitted successfully",
+      description: `Your leave has been applied for ${selectedDate.toLocaleDateString()}`,
     });
 
+    setShowConfirmDialog(false);
     navigate('/faculty');
   };
 
-  // Calculate date range for the next month
-  const today = new Date();
-  const maxDate = new Date();
-  maxDate.setMonth(today.getMonth() + 1);
-
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      <BackButton />
-      <div className="max-w-4xl mx-auto mt-8">
+    <div className="min-h-screen bg-gray-100">
+      <header className="bg-[#8B0000] text-white p-4 flex items-center gap-4">
+        <BackButton />
+        <h1 className="text-2xl font-bold">Apply for Leave</h1>
+      </header>
+
+      <div className="max-w-4xl mx-auto p-6">
         <Card className="p-6">
-          <h1 className="text-2xl font-bold mb-6">Leave Application</h1>
-          
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="date"
-                render={() => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Select Date</FormLabel>
-                    <Calendar
-                      mode="single"
-                      selected={selectedDate}
-                      onSelect={setSelectedDate}
-                      disabled={(date) => 
-                        date < today || 
-                        date > maxDate || 
-                        date.getDay() === 0 || 
-                        date.getDay() === 6
-                      }
-                      className="rounded-md border"
-                    />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="reason"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Reason for Leave</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Please provide a reason for your leave request"
-                        className="min-h-[100px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <Button 
-                type="submit"
-                className="w-full bg-sathyabama-blue hover:bg-sathyabama-light"
-              >
-                Submit Leave Application
-              </Button>
-            </form>
-          </Form>
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold">Select Leave Date</h2>
+            <p className="text-gray-600">
+              Please select a date within the next 30 days (excluding weekends)
+            </p>
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={handleDateSelect}
+              disabled={(date) => 
+                date < today || 
+                date > maxDate || 
+                date.getDay() === 0 || 
+                date.getDay() === 6
+              }
+              className="rounded-md border"
+            />
+          </div>
         </Card>
+
+        <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirm Leave Application</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to apply for leave on{" "}
+                {selectedDate?.toLocaleDateString()}?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleConfirmLeave}>
+                Confirm
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
